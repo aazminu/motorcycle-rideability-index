@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Motorcycle Rideability Index</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+</head>
+
+<body>
+  <header class="navbar">
+    <a href="#" onclick="showHome()"><i class="fas fa-home"></i> Home</a>
+    <a href="#" onclick="showRecents()"><i class="fas fa-history"></i> Recents</a>
+    <a href="#" onclick="showAbout()"><i class="fas fa-info-circle"></i> About</a>
+    
+  </header>
+
+  <main>
+    <div id="home-view" class="view active">
+      <h1>Motorcycle Rideability Index</h1>
+      <p>Enter your zip code to get current weather data and a rideability score for motorcycle riding.</p>
+
+      <div class="search-container">
+        <input type="text" id="zip-input" class="search-bar" placeholder="Enter your zip code">
+        <button id="get-score-button">Get Score</button>
+        <p id="error-message" class="error-message"></p>
+      </div>
+    </div>
+
+    <div id="recents-view" class="view" style="display: none;">
+      <h2>Recent Searches</h2>
+      <div id="recents-container"></div>
+    </div>
+
+    <div id="results-view" class="view" style="display: none;">
+      <h2 id="results-location">Location Name</h2>
+
+      <div class="weather-data">
+        <p><strong>Temperature:</strong> <span id="temperature"></span> °C</p>
+        <p><strong>Humidity:</strong> <span id="humidity"></span> %</p>
+        <p><strong>Weather:</strong> <span id="weather-description"></span></p>
+        <p><strong>Precipitation:</strong> <span id="precipitation"></span> mm</p>
+        <p><strong>Visibility:</strong> <span id="visibility"></span> km</p>
+        <p><strong>Wind Speed:</strong> <span id="wind"></span> m/s</p>
+        <p><strong>Rideability Score:</strong> <span id="rideability-score"></span></p>
+      </div>
+      <button class="back-button" onclick="showHome()">Check Another Location</button>
+    </div>
+
+    <div id="about-view" class="view" style="display: none;">
+      <h1>About</h1>
+      <p>This application fetches weather data and calculates a rideability score based on current conditions. It is designed to help motorcyclists decide whether it is safe to ride.</p>
+      <h2>Rideability Score Calculation Logic</h2>
+      <p>The rideability score is calculated based on the following criteria:</p>
+      <ul>
+        <li>Precipitation: Subtracts 3 points, Snow subtracts 8 points</li>
+        <li>Visibility: Less than 2 km subtracts 5 points, between 2 km and 5 km subtracts 2 points, and between 5 km and 10 km subtracts 1 point</li>
+        <li>Temperature: Below 0°C subtracts 2 points, above 30°C subtracts 2 points, between 5°C and 25°C subtracts 1 point</li>
+        <li>Wind: Above 5 m/s subtracts 1 point, above 10 m/s subtracts 2 points</li>
+      </ul>
+    </div>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>
