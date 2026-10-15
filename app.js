@@ -1,14 +1,31 @@
 function calculateRideabilityScore(temperature, visibility, isSnow, precipitation, wind) {
+  const temp =
+    temperature === null || temperature === undefined || Number.isNaN(Number(temperature))
+      ? 20
+      : Number(temperature);
+  const vis =
+    visibility === null || visibility === undefined || Number.isNaN(Number(visibility))
+      ? 10
+      : Number(visibility);
+  const precip =
+    precipitation === null || precipitation === undefined || Number.isNaN(Number(precipitation))
+      ? 0
+      : Number(precipitation);
+  const windSpeed =
+    wind === null || wind === undefined || Number.isNaN(Number(wind))
+      ? 0
+      : Number(wind);
+
   let score = 10;
   if (isSnow) score -= 8;
-  if (precipitation > 0) score -= 3;
-  if (visibility < 2) score -= 5;
-  if (visibility < 5) score -= 2;
-  if (visibility < 10) score -= 1;
-  if (temperature < 0 || temperature > 30) score -= 2;
-  if (temperature < 5 || temperature > 25) score -= 1;
-  if (wind > 5) score -= 1;
-  if (wind > 10) score -= 2;
+  if (precip > 0) score -= 3;
+  if (vis < 2) score -= 5;
+  if (vis < 5) score -= 2;
+  if (vis < 10) score -= 1;
+  if (temp < 0 || temp > 30) score -= 2;
+  if (temp < 5 || temp > 25) score -= 1;
+  if (windSpeed > 5) score -= 1;
+  if (windSpeed > 10) score -= 2;
   return Math.max(0, Math.min(10, score));
 }
 
@@ -31,10 +48,17 @@ function buildSearchRecord(payload, id) {
     temperature,
     humidity,
     weather,
-    precipitation = 0,
-    visibility = 10,
-    wind = 0,
-  } = payload;
+    precipitation: rawPrecipitation,
+    visibility: rawVisibility,
+    wind: rawWind,
+  } = payload || {};
+  const precipitation =
+    rawPrecipitation === null || rawPrecipitation === undefined ? 0 : Number(rawPrecipitation) || 0;
+  const visibility =
+    rawVisibility === null || rawVisibility === undefined ? 10 : Number(rawVisibility);
+  const wind =
+    rawWind === null || rawWind === undefined ? 0 : Number(rawWind) || 0;
+
   const rideabilityScore = calculateRideabilityScore(
     temperature,
     visibility,
@@ -97,8 +121,11 @@ function createServer() {
       const weatherData = await getWeatherData(lat, lon);
       const weatherMain = weatherData.current.weather[0].main || '';
       const weatherDesc = weatherData.current.weather[0].description || weatherMain;
-      const precipitation = weatherData.current.rain ? weatherData.current.rain['1h'] : 0;
-      const visibilityKm = weatherData.current.visibility / 1000;
+      const rain1h = Number(weatherData.current.rain?.['1h']) || 0;
+      const snow1h = Number(weatherData.current.snow?.['1h']) || 0;
+      const precipitation = rain1h + snow1h;
+      const visibilityKm =
+        weatherData.current.visibility != null ? weatherData.current.visibility / 1000 : 10;
       const rideabilityScore = calculateRideabilityScore(
         weatherData.current.temp,
         visibilityKm,
@@ -167,7 +194,12 @@ function createServer() {
   app.put('/api/searches/:id', async (req, res) => {
     try {
       const search = await db.get(req.params.id);
-      const merged = { ...search, ...req.body };
+      const merged = {
+        ...search,
+        ...req.body,
+        _id: search._id,
+        _rev: search._rev,
+      };
       merged.rideabilityScore = calculateRideabilityScore(
         merged.temperature,
         merged.visibility,
