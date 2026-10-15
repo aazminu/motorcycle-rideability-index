@@ -38,4 +38,23 @@ test('buildSearchRecord detects snow from weather description and attaches risk 
   assert.equal(rec._id, '42');
   assert.equal(rec.rideabilityScore, 0);
   assert.equal(rec.risk.level, 'EXTREME');
+
+  // Explicit null fields should fall back to safe defaults (10km visibility, 0 precip, 0 wind)
+  const clearRec = buildSearchRecord(
+    {
+      zipCode: '02139',
+      location: 'Cambridge',
+      temperature: 20,
+      humidity: 50,
+      weather: 'clear sky',
+      precipitation: null,
+      visibility: null,
+      wind: null,
+    },
+    43
+  );
+  assert.equal(clearRec.visibility, 10);
+  assert.equal(clearRec.rideabilityScore, 10);
+  assert.equal(clearRec.risk.level, 'LOW');
 });
+
