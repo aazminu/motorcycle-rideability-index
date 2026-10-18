@@ -236,10 +236,35 @@ if (require.main === module) {
   });
 }
 
+function summarizeForecastWindow(hourlyForecasts = []) {
+  if (!Array.isArray(hourlyForecasts) || hourlyForecasts.length === 0) {
+    return { count: 0, meanScore: 0, bestScore: 0, worstRiskLevel: 'EXTREME' };
+  }
+  const scores = hourlyForecasts.map((h) =>
+    calculateRideabilityScore(
+      h.temperature,
+      h.visibility,
+      Boolean(h.isSnow || isSnowWeather(h.weather)),
+      h.precipitation,
+      h.wind
+    )
+  );
+  const bestScore = Math.max(...scores);
+  const worstScore = Math.min(...scores);
+  const meanScore = Number((scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(2));
+  return {
+    count: scores.length,
+    meanScore,
+    bestScore,
+    worstRiskLevel: classifyRideRisk(worstScore).level,
+  };
+}
+
 module.exports = {
   calculateRideabilityScore,
   classifyRideRisk,
   isSnowWeather,
   buildSearchRecord,
+  summarizeForecastWindow,
   createServer,
 };
