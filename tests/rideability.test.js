@@ -58,3 +58,13 @@ test('buildSearchRecord detects snow from weather description and attaches risk 
   assert.equal(clearRec.risk.level, 'LOW');
 });
 
+test('summarizeForecastWindow computes peak, mean, and worst risk tier across hourly forecasts', () => {
+  const { summarizeForecastWindow } = require('../app');
+  const summary = summarizeForecastWindow([
+    { temperature: 21, visibility: 10, weather: 'clear sky', precipitation: 0, wind: 2 },
+    { temperature: 16, visibility: 8, weather: 'light rain', precipitation: 1.5, wind: 6 },
+  ]);
+  assert.equal(summary.count, 2);
+  assert.equal(summary.bestScore, 10);
+  assert.ok(summary.meanScore >= 7);
+});
